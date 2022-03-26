@@ -15,49 +15,58 @@
 
   --bg-clear: rgb(244, 67, 54);
   --bg-clear-hover: rgb(229, 57, 53);
+
+  --bg-memory: rgb(94, 168, 211);
+  --bg-memory-hover: rgb(83, 149, 187);
+
+  --pseudo-gap: 0.3rem;
 }
 
 .container {
-  width: max-content;
+  width: 90vw;
+  max-width: 720px;
   margin: auto;
   margin-top: 1em;
   background: var(--bg-container);
-  padding-top: 1em;
+  padding: 1rem;
   font-family: var(--font-container);
   border: none;
   border-radius: 5px;
-  outline: none !important;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 .display {
-  width: 92.8%;
+  width: calc(100% - 2 * var(--pseudo-gap));
   background-color: var(--bg-display);
   height: 60px;
   font-size: 35px;
   border: none;
   border-radius: 5px;
   outline: none !important;
-  padding: 0.5em 0.2em 0.2em 0.2em;
+  padding: 0.5em;
   display: flex;
-  margin-bottom: .5em;
+  margin-bottom: var(--pseudo-gap);
   text-align: right;
 }
 
 .buttons {
-  margin-bottom: .5em;
-  max-width: 388px;
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
 }
 
 button {
-  flex: 1 20%;
-  padding: 15px;
-  font-size: 26px;
-  margin: 0.3em;
+  flex: 1 calc(100% / 4 - (2 * var(--pseudo-gap)) );
+  padding: .5rem 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5vw;
+  font-weight: bold;
+  margin: var(--pseudo-gap);
   border: none;
   border-radius: 5px;
   outline: none !important;
@@ -65,9 +74,12 @@ button {
 }
 
 .btn-memory {
-  flex: 1 16%;
-  padding: 0px;
-  margin: 0px;
+  flex: 1 calc(100% / 6 - (2 * var(--pseudo-gap)) );
+  background-color: var(--bg-memory);
+}
+
+.btn-memory:hover {
+  background-color: var(--bg-memory-hover);
 }
 
 .btn-operand {
