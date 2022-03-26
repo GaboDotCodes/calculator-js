@@ -1,34 +1,77 @@
 'use strict'
 
 const objButtons = [
-    { class: 'btn-operand', value: '1' },
-    { class: 'btn-operand', value: '2' },
-    { class: 'btn-operand', value: '3' },
-    { class: 'btn-operator', value: '+' },
-    { class: 'btn-operand', value: '4' },
-    { class: 'btn-operand', value: '5' },
-    { class: 'btn-operand', value: '6' },
-    { class: 'btn-operator', value: '-' },
-    { class: 'btn-operand', value: '7' },
-    { class: 'btn-operand', value: '8' },
-    { class: 'btn-operand', value: '9' },
-    { class: 'btn-operator', value: '*' },
-    { class: 'btn-operand', value: '0' },
-    { class: 'btn-operand', value: '.' },
-    { class: 'btn-clear', value: 'C' },
-    { class: 'btn-operator', value: '/' },
-    { class: 'btn-erase', value: '&LeftArrowBar;' },
-    { class: 'btn-operator', value: '(' },
-    { class: 'btn-operator', value: ')' },
-    { class: 'btn-equals', value: '=' }
+    { cssClass: 'btn-memory', value: 'mc', id: 'memoryClear' },
+    { cssClass: 'btn-memory', value: 'mr', id: 'memoryRetrieve' },
+    { cssClass: 'btn-memory', value: 'ms', id: 'memoryStorage' },
+    { cssClass: 'btn-memory', value: 'm+', id: 'memoryAdd' },
+    { cssClass: 'btn-memory', value: 'm-', id: 'memorySubtract' },
+    { cssClass: 'btn-memory', value: 'ce', id: 'clearError' },
+
+    { cssClass: 'btn-operand', value: '1' },
+    { cssClass: 'btn-operand', value: '2' },
+    { cssClass: 'btn-operand', value: '3' },
+    { cssClass: 'btn-operator', value: '+' },
+    { cssClass: 'btn-operand', value: '4' },
+    { cssClass: 'btn-operand', value: '5' },
+    { cssClass: 'btn-operand', value: '6' },
+    { cssClass: 'btn-operator', value: '-' },
+    { cssClass: 'btn-operand', value: '7' },
+    { cssClass: 'btn-operand', value: '8' },
+    { cssClass: 'btn-operand', value: '9' },
+    { cssClass: 'btn-operator', value: '*' },
+    { cssClass: 'btn-operand', value: '0' },
+    { cssClass: 'btn-operand', value: '.' },
+    { cssClass: 'btn-clear', value: 'C' },
+    { cssClass: 'btn-operator', value: '/' },
+    { cssClass: 'btn-erase', value: '&LeftArrowBar;', id: 'Backspace' },
+    { cssClass: 'btn-operator', value: '(' },
+    { cssClass: 'btn-operator', value: ')' },
+    { cssClass: 'btn-equals', value: '=', id: 'Enter' }
 ]
 
 let displayData = ''
 
+class Memory {
+    #memory
+
+    constructor() {
+        this.#memory = [null] // [0] Oldest memory to [-1] newest memory
+    }
+
+    getMemory = () => this.#memory
+
+    memoryClear = () => this.#memory = [null]
+
+    memoryRetrieve = () => this.#memory.slice(-1)[0]
+
+    memoryStorage = (newMemory) => {
+        this.#memory.push(newMemory)
+        return null
+    }
+
+    memoryAdd = (termToSum) => {
+        if (this.memoryRetrieve() !== null) this.#memory.push(this.memoryRetrieve() + termToSum)
+    }
+
+    memorySubtract = (termToSubtract) => {
+        if (this.memoryRetrieve() !== null) this.#memory.push(this.memoryRetrieve() - termToSubtract)
+    }
+
+    clearError = () => {
+        if (this.memoryRetrieve() !== null) this.#memory.pop()
+        return this.memoryRetrieve()
+    }
+}
+
+const memory = new Memory()
+
 document.addEventListener('DOMContentLoaded', event => {
 
     const inputHandler = event => {
-        const item = event instanceof PointerEvent ? event.target.innerText : event instanceof KeyboardEvent ? event.key : ''
+        const item = event instanceof PointerEvent ?
+            event.target.innerText :
+            event instanceof KeyboardEvent ? event.key : ''
 
         if (displayData === '') {
             displayData = new RegExp('[)*/]').exec(item) ? '' : displayData + item
@@ -94,7 +137,10 @@ document.addEventListener('DOMContentLoaded', event => {
     const display = document.querySelector('.display')
 
     objButtons.forEach(objButton => {
-        const item = `<button class="${objButton.class}">${objButton.value}</button>`
+        const { cssClass, value, id } = objButton
+
+        const item = `<button class="${cssClass}" id=${id ? id : value}>${value}</button>`
+
         divButtons.insertAdjacentHTML('beforeend', item)
     })
 
@@ -116,7 +162,27 @@ document.addEventListener('DOMContentLoaded', event => {
     document.addEventListener('keyup', (event) => {
         const { key } = event
         if (new RegExp('^[0-9+--*/().=]$').exec(key)) inputHandler(event)
-        if (key === 'Backspace') eraseHandler()
-        if (key === 'Enter') equalsHandler()
+        if (key === 'Backspace') eraseHandler(event)
+        if (key === 'Enter') equalsHandler(event)
+    })
+
+    const memoryButtons = document.querySelectorAll('.btn-memory')
+
+    memoryButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const memoryOperation = event.target.id
+            const inconditionalOperations = ['memoryClear', 'memoryRetrieve', 'clearError']
+            if (new RegExp('^-{0,1}[0-9.]{1,}$').exec(display.value) || inconditionalOperations.includes(memoryOperation)) {
+                if (memoryOperation === 'memoryClear') {
+                    if (confirm('Esta operación borra toda la memoria almacenada, está de acuerdo?')) {
+                        memory[memoryOperation]()
+                    }
+                } else {
+                    const result = memory[memoryOperation](parseFloat(display.value));
+                    if (!result && memoryOperation === 'clearError') alert('Memoria vacía')
+                    display.value = result ? result : display.value
+                }
+            }
+        })
     })
 })
